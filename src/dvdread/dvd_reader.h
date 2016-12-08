@@ -129,7 +129,9 @@ void DVDClose( dvd_reader_t * );
 
 /**
  * Returns the number of linear blocks supported on a DVD reader
- * object.
+ * object.  Note: since this is the maximum seekable LB, the size
+ * is this + 1; e.g., if this returns 1, we could read LB 0 or LB 1,
+ * so the disc is 2 LBs long.
  *
  * @param dvd A read handle to query
  * @return If successful, the maximum linear block number.
