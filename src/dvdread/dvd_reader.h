@@ -140,6 +140,20 @@ void DVDClose( dvd_reader_t * );
 uint32_t DVDGetMaxLB( dvd_reader_t * );
 
 /**
+ * Reads raw blocks from disc
+ *
+ * @param dvd A read handle
+ * @param data A buffer to read into, at least 2048 * n_blocks bytes
+ * @param lb LB number to start from
+ * @param n_blocks Number of blocks
+ * @param encrypted Try to decrypt if using libdvdcss?
+ * @return Number of blocks read
+ */
+
+uint32_t DVDReadRawBlocks( dvd_reader_t *, unsigned char *,
+                      uint32_t, uint32_t, int );
+
+/**
  *
  */
 typedef enum {

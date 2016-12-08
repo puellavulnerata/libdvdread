@@ -677,6 +677,32 @@ uint32_t DVDGetMaxLB( dvd_reader_t *dvd ) {
 }
 
 /**
+ * Raw block read
+ */
+
+uint32_t DVDReadRawBlocks( dvd_reader_t *dvd, unsigned char *buffer,
+                        uint32_t lb, uint32_t n_blocks, int encrypted ) {
+  uint32_t ret;
+
+  if (!dvd || !buffer || !n_blocks) return 0;
+
+  if( !dvd->dev ) {
+    fprintf( stderr, "libdvdread: Fatal error in block read.\n" );
+    return 0;
+  }
+
+  ret = dvdinput_seek( dvd->dev, (int) lb );
+  if( ret != lb ) {
+    fprintf( stderr, "libdvdread: Can't seek to block %u\n", lb );
+    return 0;
+  }
+
+  ret = dvdinput_read( dvd->dev, (char *) buffer,
+                       (int) n_blocks, encrypted );
+  return ret;
+}
+
+/**
  * Open an unencrypted file on a DVD image file.
  */
 static dvd_file_t *DVDOpenFileUDF( dvd_reader_t *dvd, const char *filename,
