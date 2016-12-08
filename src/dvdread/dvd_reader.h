@@ -128,6 +128,16 @@ dvd_reader_t *DVDOpenStream( void *, dvd_reader_stream_cb * );
 void DVDClose( dvd_reader_t * );
 
 /**
+ * Returns the number of linear blocks supported on a DVD reader
+ * object.
+ *
+ * @param dvd A read handle to query
+ * @return If successful, the maximum linear block number.
+ */
+
+uint32_t DVDGetMaxLB( dvd_reader_t * );
+
+/**
  *
  */
 typedef enum {

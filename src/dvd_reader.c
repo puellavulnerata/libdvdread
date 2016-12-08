@@ -636,6 +636,47 @@ void DVDClose( dvd_reader_t *dvd )
 }
 
 /**
+ * Search for the maximum linear block number
+ */
+uint32_t DVDGetMaxLB( dvd_reader_t *dvd ) {
+  uint32_t max_lb, max_lb_low, max_lb_high;
+
+  if (!dvd) return 0;
+
+  /* Exponential scan for upper bound on maximum LB */
+  max_lb = max_lb_low = 0;
+  while (dvdinput_seek(dvd->dev, (int)max_lb) == (int)max_lb) {
+    /* Update the lower bound if we just succeeded */
+    max_lb_low = max_lb;
+    /* We just succeeded in reading UINT32_MAX */
+    if (max_lb == UINT32_MAX) break;
+    /* Try the end next if we're more than halfway to UINT32_MAX */
+    else if (max_lb > UINT32_MAX / 2) max_lb = UINT32_MAX;
+    /* else double it, searching exponentially */
+    else if (max_lb > 0) max_lb *= 2;
+    /* else increment if we just tried block 0 */
+    else ++max_lb;
+  }
+  /*
+   * We either just got to UINT32_MAX or failed something; set max_lb_high
+   * to max_lb and binary-search for the exact end; if it was UINT32_MAX,
+   * we have max_lb_low == max_lb == UINT32_MAX, so the while loop
+   * doesn't execute and we're done.  Otherwise, max_lb is something that
+   * just failed, and the invariant in the while loop is that max_lb_high
+   * is always something that failed and max_lb_low is something that
+   * succeeded.
+   */
+  max_lb_high = max_lb;
+  while (max_lb_low < max_lb_high - 1) {
+    max_lb = max_lb_low + (max_lb_high - max_lb_low) / 2;
+    if (dvdinput_seek(dvd->dev, (int)max_lb) == (int)max_lb) max_lb_low = max_lb;
+    else max_lb_high = max_lb;
+  }
+  /* Now max_lb_low is the highest seekable lb */
+  return max_lb_low;
+}
+
+/**
  * Open an unencrypted file on a DVD image file.
  */
 static dvd_file_t *DVDOpenFileUDF( dvd_reader_t *dvd, const char *filename,
